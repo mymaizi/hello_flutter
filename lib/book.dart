@@ -1,7 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class Book extends StatelessWidget {
+typedef ShowCallback = Function(bool flag);
+typedef DisplayCallback = Function(String text);
+
+class Book extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return BookState();
+  }
+}
+
+class BookState extends State<Book> {
+  bool isShow = false;
+  String displayText = "";
+  void setShow(bool flag) {
+    setState(() {
+      isShow = flag;
+    });
+  }
+
+  void setDisplayText(String text) {
+    setState(() {
+      displayText = text;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -24,18 +48,33 @@ class Book extends StatelessWidget {
             Books(),
             Align(
               alignment: Alignment.centerRight,
-              child: Character(),
+              child: Character(
+                showCallback: (bool flag) {
+                  setShow(flag);
+                },
+                displayCallback: (String text){
+                  setDisplayText(text);
+                },
+              ),
             ),
             Align(
-              child: Container(
-                width: ScreenUtil().setWidth(200),
-                height: ScreenUtil().setHeight(160),
-                decoration: BoxDecoration(
-                  color: Colors.grey[400],
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Center(
-                  child: Text("A",style: TextStyle(fontSize: ScreenUtil().setSp(80),color: Colors.white),),
+              child: Offstage(
+                offstage: !isShow,
+                child: Container(
+                  width: ScreenUtil().setWidth(200),
+                  height: ScreenUtil().setHeight(160),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                  child: Center(
+                    child: Text(
+                      displayText,
+                      style: TextStyle(
+                          fontSize: ScreenUtil().setSp(80),
+                          color: Colors.white),
+                    ),
+                  ),
                 ),
               ),
               alignment: Alignment.center,
@@ -85,6 +124,13 @@ class _CharacterState extends State<_Character> {
 }
 
 class Character extends StatefulWidget {
+  final ShowCallback showCallback;
+  final DisplayCallback displayCallback;
+  Character(
+      {Key key,
+      @required ShowCallback this.showCallback,
+      @required DisplayCallback this.displayCallback})
+      : super(key: key);
   @override
   State<StatefulWidget> createState() {
     return CharacterState();
@@ -147,9 +193,16 @@ class CharacterState extends State<Character> {
     return -1;
   }
 
-  void onTouch(flag) {
+  void onTouch(bool flag) {
     setState(() {
       isOnTouch = flag;
+      widget.showCallback(flag);
+    });
+  }
+
+  void setDisplayText(String text) {
+    setState(() {
+      widget.displayCallback(text);
     });
   }
 
@@ -175,7 +228,7 @@ class CharacterState extends State<Character> {
         int offset = details.globalPosition.dy.toInt() - _widgetTop;
         int index = _getCharacterIndex(offset);
         var c = _character[index];
-        print(c);
+        setDisplayText(c);
       },
       onVerticalDragEnd: (details) {
         onTouch(false);
