@@ -3,6 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 typedef ShowCallback = Function(bool flag);
 typedef DisplayCallback = Function(String text);
+Map<String, GlobalKey> _mkeys;
+ScrollController _scrollController = new ScrollController();
+GlobalKey appBarKey = new GlobalKey();
 
 class Book extends StatefulWidget {
   @override
@@ -23,6 +26,13 @@ class BookState extends State<Book> {
   void setDisplayText(String text) {
     setState(() {
       displayText = text;
+      if (_mkeys.containsKey(text)) {
+        RenderBox _box = _mkeys["W"].currentContext.findRenderObject();
+        Offset offset = _box.localToGlobal(Offset.zero);
+        RenderBox _box1 = appBarKey.currentContext.findRenderObject();
+        _scrollController.animateTo(offset.dy.toDouble() - _box1.size.height,
+            duration: Duration(milliseconds: 1), curve: Curves.ease);
+      }
     });
   }
 
@@ -30,6 +40,7 @@ class BookState extends State<Book> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
+          key: appBarKey,
           title: new Text("通讯录"),
           actions: <Widget>[
             new IconButton(
@@ -52,7 +63,7 @@ class BookState extends State<Book> {
                 showCallback: (bool flag) {
                   setShow(flag);
                 },
-                displayCallback: (String text){
+                displayCallback: (String text) {
                   setDisplayText(text);
                 },
               ),
@@ -71,7 +82,7 @@ class BookState extends State<Book> {
                     child: Text(
                       displayText,
                       style: TextStyle(
-                          fontSize: ScreenUtil().setSp(80),
+                          fontSize: ScreenUtil().setSp(100),
                           color: Colors.white),
                     ),
                   ),
@@ -211,8 +222,8 @@ class CharacterState extends State<Character> {
   Widget build(BuildContext context) {
     return GestureDetector(
       child: Container(
-          width: ScreenUtil().setWidth(45),
-          color: isOnTouch ? Colors.grey[200] : null,
+          width: ScreenUtil().setWidth(50),
+          color: isOnTouch ? Colors.grey[300] : null,
           child: _Character(
             key: _ckey,
             data: _character,
@@ -245,31 +256,90 @@ class Books extends StatefulWidget {
 }
 
 class BooksState extends State<Books> {
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(itemBuilder: (context, index) {
-      if (index.isOdd) return new Divider();
-      return new ListTile(
+  var list = [
+    {
+      "Group": "A",
+      "Childs": [
+        {"Name": "爱妃0", "Number": "a1230", "avatar": "images/avatar0.png"},
+        {"Name": "爱妃1", "Number": "a1231", "avatar": "images/avatar1.png"},
+        {"Name": "爱妃2", "Number": "a1232", "avatar": "images/avatar1.png"},
+        {"Name": "爱妃3", "Number": "a1233", "avatar": "images/avatar1.png"},
+        {"Name": "爱妃4", "Number": "a1234", "avatar": "images/avatar0.png"},
+        {"Name": "爱妃4", "Number": "a1234", "avatar": "images/avatar0.png"},
+        {"Name": "爱妃4", "Number": "a1234", "avatar": "images/avatar0.png"},
+        {"Name": "爱妃4", "Number": "a1234", "avatar": "images/avatar0.png"},
+        {"Name": "爱妃4", "Number": "a1234", "avatar": "images/avatar0.png"},
+      ]
+    },
+    {
+      "Group": "B",
+      "Childs": [
+        {"Name": "宝批龙1", "Number": "b1230", "avatar": "images/avatar1.png"},
+        {"Name": "宝批龙2", "Number": "b1231", "avatar": "images/avatar0.png"},
+        {"Name": "宝批龙3", "Number": "b1232", "avatar": "images/avatar1.png"},
+        {"Name": "宝批龙4", "Number": "b1233", "avatar": "images/avatar0.png"},
+        {"Name": "宝批龙5", "Number": "b1234", "avatar": "images/avatar1.png"}
+      ]
+    },
+    {
+      "Group": "W",
+      "Childs": [
+        {"Name": "王麻子0", "Number": "w1230", "avatar": "images/avatar1.png"},
+        {"Name": "王麻子1", "Number": "w1231", "avatar": "images/avatar1.png"},
+        {"Name": "王麻子2", "Number": "w1232", "avatar": "images/avatar0.png"},
+        {"Name": "王麻子3", "Number": "w1233", "avatar": "images/avatar0.png"},
+        {"Name": "王麻子4", "Number": "w1234", "avatar": "images/avatar1.png"}
+      ]
+    }
+  ];
+  List<Widget> _creatChilds(p, childs) {
+    List<Widget> _list = [];
+    _list.add(p);
+    childs.forEach((item) {
+      var _item = new ListTile(
         leading: Stack(
           children: <Widget>[
             ClipOval(
-              child: Container(
-                width: ScreenUtil().setWidth(80),
-                height: ScreenUtil().setHeight(75),
-                color: Colors.red,
+              child: Image.asset(
+                item["avatar"],
+                width: ScreenUtil().setWidth(90),
               ),
             ),
-            SizedBox(
-              width: ScreenUtil().setWidth(80),
-              height: ScreenUtil().setHeight(75),
-              child: Center(
-                child: Text("A"),
-              ),
-            )
           ],
         ),
-        title: new Text("王麻子${index}"),
+        title: new Text(item["Name"]),
       );
+      _list.add(_item);
     });
+    return _list;
+  }
+
+  List<Widget> _creatParents() {
+    List<Widget> _list = [];
+    list.forEach((item) {
+      var _ckey = GlobalKey();
+      var _cValue = item["Group"];
+      _mkeys[_cValue] = _ckey;
+      var p = Container(
+        key: _ckey,
+        child: Text(_cValue),
+        alignment: Alignment.centerLeft,
+        color: Colors.grey[200],
+        padding: EdgeInsets.only(left: 15),
+        height: ScreenUtil().setHeight(70),
+      );
+      var _item = Column(children: _creatChilds(p, item["Childs"]));
+      _list.add(_item);
+    });
+    return _list;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _mkeys = new Map<String, GlobalKey>();
+    return ListView(
+      controller: _scrollController,
+      children: _creatParents(),
+    );
   }
 }
