@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 typedef ShowCallback = Function(bool flag);
-typedef DisplayCallback = Function(String text);
-Map<String, GlobalKey> _mkeys;
+typedef DisplayCallback = Function(String text, int index);
+Map<String, int> _indexs = new Map();
 ScrollController _scrollController = new ScrollController();
-GlobalKey appBarKey = new GlobalKey();
+GlobalKey _listKey = new GlobalKey();
 
 class Book extends StatefulWidget {
   @override
@@ -17,22 +17,33 @@ class Book extends StatefulWidget {
 class BookState extends State<Book> {
   bool isShow = false;
   String displayText = "";
-  void setShow(bool flag) {
+  void _setShow(bool flag) {
     setState(() {
       isShow = flag;
     });
   }
 
-  void setDisplayText(String text) {
+  //这个方法保留，用于通过索引获取滚动下标
+  int _getCurrentIndex(currentIndex) {
+    int count = _indexs.length;
+    int _currentIndex = 0;
+    for (int i = currentIndex; i > 0; i--) {
+      if (i - 1 < count) {
+        _currentIndex = i - 1;
+        break;
+      }
+    }
+    return _currentIndex;
+  }
+
+  void _setDisplayText(String text, int index) {
     setState(() {
       displayText = text;
-      if (_mkeys.containsKey(text)) {
-        RenderBox _box = _mkeys["W"].currentContext.findRenderObject();
-        Offset offset = _box.localToGlobal(Offset.zero);
-        RenderBox _box1 = appBarKey.currentContext.findRenderObject();
-        _scrollController.animateTo(offset.dy.toDouble() - _box1.size.height,
-            duration: Duration(milliseconds: 1), curve: Curves.ease);
+      if (_indexs.containsKey(text)) {
+        var o = _indexs[text].toDouble();
+        _scrollController.jumpTo(o);
       }
+      print(_scrollController.position.pixels);
     });
   }
 
@@ -40,7 +51,6 @@ class BookState extends State<Book> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          key: appBarKey,
           title: new Text("通讯录"),
           actions: <Widget>[
             new IconButton(
@@ -61,10 +71,10 @@ class BookState extends State<Book> {
               alignment: Alignment.centerRight,
               child: Character(
                 showCallback: (bool flag) {
-                  setShow(flag);
+                  _setShow(flag);
                 },
-                displayCallback: (String text) {
-                  setDisplayText(text);
+                displayCallback: (String text, int index) {
+                  _setDisplayText(text, index);
                 },
               ),
             ),
@@ -75,7 +85,7 @@ class BookState extends State<Book> {
                   width: ScreenUtil().setWidth(200),
                   height: ScreenUtil().setHeight(160),
                   decoration: BoxDecoration(
-                    color: Colors.grey[400],
+                    color: Colors.grey,
                     borderRadius: BorderRadius.circular(6.0),
                   ),
                   child: Center(
@@ -211,9 +221,9 @@ class CharacterState extends State<Character> {
     });
   }
 
-  void setDisplayText(String text) {
+  void setDisplayText(String text, index) {
     setState(() {
-      widget.displayCallback(text);
+      widget.displayCallback(text, index);
     });
   }
 
@@ -223,7 +233,7 @@ class CharacterState extends State<Character> {
     return GestureDetector(
       child: Container(
           width: ScreenUtil().setWidth(50),
-          color: isOnTouch ? Colors.grey[300] : null,
+          color: isOnTouch ? Colors.grey[400] : null,
           child: _Character(
             key: _ckey,
             data: _character,
@@ -239,7 +249,7 @@ class CharacterState extends State<Character> {
         int offset = details.globalPosition.dy.toInt() - _widgetTop;
         int index = _getCharacterIndex(offset);
         var c = _character[index];
-        setDisplayText(c);
+        setDisplayText(c, index);
       },
       onVerticalDragEnd: (details) {
         onTouch(false);
@@ -292,12 +302,19 @@ class BooksState extends State<Books> {
       ]
     }
   ];
-  
-  List<Widget> _creatChilds(p, childs) {
+  int dyCount = 0;
+  List<Widget> _creatChilds(item) {
     List<Widget> _list = [];
-    _list.add(p);
-    childs.forEach((item) {
-      var _item = new ListTile(
+    _list.add(Container(
+      child: Text(item["Group"]),
+      alignment: Alignment.centerLeft,
+      color: Colors.grey[200],
+      padding: EdgeInsets.only(left: 15),
+      height: ScreenUtil().setHeight(70),
+    ));
+    item["Childs"].forEach((item) {
+      _list.add(ListTile(
+        onTap: () {},
         leading: Stack(
           children: <Widget>[
             ClipOval(
@@ -308,28 +325,25 @@ class BooksState extends State<Books> {
             ),
           ],
         ),
-        title: new Text(item["Name"]),
-      );
-      _list.add(_item);
+        title: Text(item["Name"]),
+      ));
     });
+    int cCount = item["Childs"].length * 56 + 45;
+    //①这种方式需要配合_getCurrentIndex方法获取对应的下标后-1在获取上一分组所占高度来实现滚动
+    // dyCount = cCount += dyCount;
+    // _indexs[item["Group"]] = dyCount;
+
+    //②这种方式直接计算每个分组所占高度
+    _indexs[item["Group"]] = dyCount == 0 ? 0 : dyCount;
+    dyCount = cCount += dyCount;
     return _list;
   }
 
   List<Widget> _creatParents() {
     List<Widget> _list = [];
+    dyCount = 0;
     list.forEach((item) {
-      var _ckey = GlobalKey();
-      var _cValue = item["Group"];
-      _mkeys[_cValue] = _ckey;
-      var p = Container(
-        key: _ckey,
-        child: Text(_cValue),
-        alignment: Alignment.centerLeft,
-        color: Colors.grey[200],
-        padding: EdgeInsets.only(left: 15),
-        height: ScreenUtil().setHeight(70),
-      );
-      var _item = Column(children: _creatChilds(p, item["Childs"]));
+      var _item = Column(children: _creatChilds(item));
       _list.add(_item);
     });
     return _list;
@@ -337,8 +351,8 @@ class BooksState extends State<Books> {
 
   @override
   Widget build(BuildContext context) {
-    _mkeys = new Map<String, GlobalKey>();
     return ListView(
+      key: _listKey,
       controller: _scrollController,
       children: _creatParents(),
     );
