@@ -338,10 +338,6 @@ class BooksState extends State<Books> {
         ));
       });
       int cCount = (item["Childs"] as dynamic).length * 56 + 45;
-      //①这种方式需要配合_getCurrentIndex方法获取对应的下标后-1在获取上一分组所占高度来实现滚动
-      // dyCount = cCount + dyCount;
-      // _indexs[item["Group"]] = dyCount;
-
       booksCount = cCount + booksCount;
       //②这种方式直接计算每个分组所占高度
       _indexs[item["Group"]] = dyCount == 0 ? 0 : dyCount;
