@@ -339,7 +339,6 @@ class BooksState extends State<Books> {
       });
       int cCount = (item["Childs"] as dynamic).length * 56 + 45;
       booksCount = cCount + booksCount;
-      //②这种方式直接计算每个分组所占高度
       _indexs[item["Group"]] = dyCount == 0 ? 0 : dyCount;
       dyCount = cCount + dyCount;
     });
