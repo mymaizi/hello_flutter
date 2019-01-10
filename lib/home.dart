@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hello_world/houses.dart';
 
 class Home extends StatelessWidget {
   @override
@@ -10,7 +11,7 @@ class Home extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          new Icon(icon, color: color,size: ScreenUtil().setSp(60)),
+          new Icon(icon, color: color, size: ScreenUtil().setSp(60)),
           new Container(
             child: new Text(
               label,
@@ -26,17 +27,26 @@ class Home extends StatelessWidget {
     }
 
     Widget buildWidgetColumn(Color color, IconData icon, String label) {
-      return new Container(
-        height: ScreenUtil().setHeight(300),
-        width: ScreenUtil().setWidth(230),
-        child: buildButtonColumn(icon, label),
-        decoration: new BoxDecoration(
-          color: color,
-          borderRadius: new BorderRadius.all(
-            const Radius.circular(8.0),
+      return GestureDetector(
+        child: Container(
+          height: ScreenUtil().setHeight(300),
+          width: ScreenUtil().setWidth(230),
+          child: buildButtonColumn(icon, label),
+          decoration: new BoxDecoration(
+            color: color,
+            borderRadius: new BorderRadius.all(
+              const Radius.circular(8.0),
+            ),
           ),
+          padding: new EdgeInsets.all(16.0),
         ),
-        padding: new EdgeInsets.all(16.0),
+        onTap: () {
+          Widget path = Houses(
+            title: label,
+          );
+          Navigator.push(
+              context, new MaterialPageRoute(builder: (context) => path));
+        },
       );
     }
 
@@ -45,16 +55,11 @@ class Home extends StatelessWidget {
         children: <Widget>[
           new Stack(
             children: <Widget>[
-              new Image.asset(
-                "images/appbg.jpg",
-                fit: BoxFit.fill,
-                height: ScreenUtil().setHeight(460)
-              ),
+              new Image.asset("images/appbg.jpg",
+                  fit: BoxFit.fill, height: ScreenUtil().setHeight(460)),
               new Positioned(
-                child: new Image.asset(
-                  "images/logo.png",
-                  height: ScreenUtil().setHeight(70)
-                ),
+                child: new Image.asset("images/logo.png",
+                    height: ScreenUtil().setHeight(70)),
                 bottom: 2,
                 right: 2,
               )
