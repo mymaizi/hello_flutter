@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 typedef ShowCallback = Function(bool flag);
-typedef DisplayCallback = Function(String text, int index);
+typedef DisplayCallback = Function(String text);
 Map<String, int> _indexs = new Map();
 ScrollController _scrollController = new ScrollController();
 GlobalKey _listKey = new GlobalKey();
+int booksCount = 0;
 
 class Book extends StatefulWidget {
   @override
@@ -23,27 +24,15 @@ class BookState extends State<Book> {
     });
   }
 
-  //这个方法保留，用于通过索引获取滚动下标
-  int _getCurrentIndex(currentIndex) {
-    int count = _indexs.length;
-    int _currentIndex = 0;
-    for (int i = currentIndex; i > 0; i--) {
-      if (i - 1 < count) {
-        _currentIndex = i - 1;
-        break;
-      }
-    }
-    return _currentIndex;
-  }
-
-  void _setDisplayText(String text, int index) {
+  void _setDisplayText(String text) {
     setState(() {
       displayText = text;
       if (_indexs.containsKey(text)) {
         var o = _indexs[text].toDouble();
+        var height = _listKey.currentContext.size.height;
+        o = booksCount - o < height ? booksCount - height : o;
         _scrollController.jumpTo(o);
       }
-      print(_scrollController.position.pixels);
     });
   }
 
@@ -73,8 +62,8 @@ class BookState extends State<Book> {
                 showCallback: (bool flag) {
                   _setShow(flag);
                 },
-                displayCallback: (String text, int index) {
-                  _setDisplayText(text, index);
+                displayCallback: (String text) {
+                  _setDisplayText(text);
                 },
               ),
             ),
@@ -214,16 +203,16 @@ class CharacterState extends State<Character> {
     return -1;
   }
 
-  void onTouch(bool flag) {
+  void _onTouch(bool flag) {
     setState(() {
       isOnTouch = flag;
       widget.showCallback(flag);
     });
   }
 
-  void setDisplayText(String text, index) {
+  void _setDisplayText(String text) {
     setState(() {
-      widget.displayCallback(text, index);
+      widget.displayCallback(text);
     });
   }
 
@@ -239,7 +228,7 @@ class CharacterState extends State<Character> {
             data: _character,
           )),
       onVerticalDragDown: (details) {
-        onTouch(true);
+        _onTouch(true);
         _initCharacterIndexList();
         RenderBox box = context.findRenderObject();
         Offset topLeftPosition = box.localToGlobal(Offset.zero);
@@ -249,10 +238,10 @@ class CharacterState extends State<Character> {
         int offset = details.globalPosition.dy.toInt() - _widgetTop;
         int index = _getCharacterIndex(offset);
         var c = _character[index];
-        setDisplayText(c, index);
+        _setDisplayText(c);
       },
       onVerticalDragEnd: (details) {
-        onTouch(false);
+        _onTouch(false);
       },
     );
   }
@@ -292,6 +281,24 @@ class BooksState extends State<Books> {
       ]
     },
     {
+      "Group": "M",
+      "Childs": [
+        {"Name": "王麻子0", "Number": "w1230", "avatar": "images/avatar1.png"},
+        {"Name": "王麻子1", "Number": "w1231", "avatar": "images/avatar1.png"},
+        {"Name": "王麻子2", "Number": "w1232", "avatar": "images/avatar0.png"},
+        {"Name": "王麻子3", "Number": "w1233", "avatar": "images/avatar0.png"},
+        {"Name": "王麻子0", "Number": "w1230", "avatar": "images/avatar1.png"},
+        {"Name": "王麻子1", "Number": "w1231", "avatar": "images/avatar1.png"},
+        {"Name": "王麻子2", "Number": "w1232", "avatar": "images/avatar0.png"},
+        {"Name": "王麻子3", "Number": "w1233", "avatar": "images/avatar0.png"},
+        {"Name": "王麻子0", "Number": "w1230", "avatar": "images/avatar1.png"},
+        {"Name": "王麻子1", "Number": "w1231", "avatar": "images/avatar1.png"},
+        {"Name": "王麻子2", "Number": "w1232", "avatar": "images/avatar0.png"},
+        {"Name": "王麻子3", "Number": "w1233", "avatar": "images/avatar0.png"},
+        {"Name": "王麻子4", "Number": "w1234", "avatar": "images/avatar1.png"}
+      ]
+    },
+    {
       "Group": "W",
       "Childs": [
         {"Name": "王麻子0", "Number": "w1230", "avatar": "images/avatar1.png"},
@@ -303,48 +310,42 @@ class BooksState extends State<Books> {
     }
   ];
   int dyCount = 0;
-  List<Widget> _creatChilds(item) {
-    List<Widget> _list = [];
-    _list.add(Container(
-      child: Text(item["Group"]),
-      alignment: Alignment.centerLeft,
-      color: Colors.grey[200],
-      padding: EdgeInsets.only(left: 15),
-      height: ScreenUtil().setHeight(70),
-    ));
-    item["Childs"].forEach((item) {
-      _list.add(ListTile(
-        onTap: () {},
-        leading: Stack(
-          children: <Widget>[
-            ClipOval(
-              child: Image.asset(
-                item["avatar"],
-                width: ScreenUtil().setWidth(90),
-              ),
-            ),
-          ],
-        ),
-        title: Text(item["Name"]),
-      ));
-    });
-    int cCount = item["Childs"].length * 56 + 45;
-    //①这种方式需要配合_getCurrentIndex方法获取对应的下标后-1在获取上一分组所占高度来实现滚动
-    // dyCount = cCount += dyCount;
-    // _indexs[item["Group"]] = dyCount;
-
-    //②这种方式直接计算每个分组所占高度
-    _indexs[item["Group"]] = dyCount == 0 ? 0 : dyCount;
-    dyCount = cCount += dyCount;
-    return _list;
-  }
-
-  List<Widget> _creatParents() {
+  List<Widget> _creatList() {
     List<Widget> _list = [];
     dyCount = 0;
+    booksCount = 0;
     list.forEach((item) {
-      var _item = Column(children: _creatChilds(item));
-      _list.add(_item);
+      _list.add(Container(
+        child: Text(item["Group"]),
+        alignment: Alignment.centerLeft,
+        color: Colors.grey[200],
+        padding: EdgeInsets.only(left: 15),
+        height: ScreenUtil().setHeight(70),
+      ));
+      (item["Childs"] as dynamic).forEach((item) {
+        _list.add(ListTile(
+          leading: Stack(
+            children: <Widget>[
+              ClipOval(
+                child: Image.asset(
+                  item["avatar"],
+                  width: ScreenUtil().setWidth(90),
+                ),
+              ),
+            ],
+          ),
+          title: Text(item["Name"]),
+        ));
+      });
+      int cCount = (item["Childs"] as dynamic).length * 56 + 45;
+      //①这种方式需要配合_getCurrentIndex方法获取对应的下标后-1在获取上一分组所占高度来实现滚动
+      // dyCount = cCount + dyCount;
+      // _indexs[item["Group"]] = dyCount;
+
+      booksCount = cCount + booksCount;
+      //②这种方式直接计算每个分组所占高度
+      _indexs[item["Group"]] = dyCount == 0 ? 0 : dyCount;
+      dyCount = cCount + dyCount;
     });
     return _list;
   }
@@ -354,7 +355,7 @@ class BooksState extends State<Books> {
     return ListView(
       key: _listKey,
       controller: _scrollController,
-      children: _creatParents(),
+      children: _creatList(),
     );
   }
 }
