@@ -3,10 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 typedef ShowCallback = Function(bool flag);
 typedef DisplayCallback = Function(String text);
-Map<String, int> _indexs = new Map();
+Map<String, double> _indexs = new Map();
 ScrollController _scrollController = new ScrollController();
 GlobalKey _listKey = new GlobalKey();
-int booksCount = 0;
+double booksCount = 0;
 
 class Book extends StatefulWidget {
   @override
@@ -309,7 +309,7 @@ class BooksState extends State<Books> {
       ]
     }
   ];
-  int dyCount = 0;
+  double dyCount = 0;
   List<Widget> _creatList() {
     List<Widget> _list = [];
     dyCount = 0;
@@ -323,21 +323,28 @@ class BooksState extends State<Books> {
         height: ScreenUtil().setHeight(70),
       ));
       (item["Childs"] as dynamic).forEach((item) {
-        _list.add(ListTile(
-          leading: Stack(
-            children: <Widget>[
-              ClipOval(
-                child: Image.asset(
-                  item["avatar"],
-                  width: ScreenUtil().setWidth(90),
+        _list.add(Container(
+          child: ListTile(
+            leading: Stack(
+              children: <Widget>[
+                ClipOval(
+                  child: Image.asset(
+                    item["avatar"],
+                    width: ScreenUtil().setWidth(90),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            title: Text(item["Name"]),
           ),
-          title: Text(item["Name"]),
+          height: ScreenUtil().setHeight(112),
         ));
       });
-      int cCount = (item["Childs"] as dynamic).length * 56 + 45;
+
+      double cCount = (item["Childs"] as dynamic).length *
+              ScreenUtil().setHeight(112).toDouble() +
+          ScreenUtil().setHeight(70).toDouble();
+
       booksCount = cCount + booksCount;
       _indexs[item["Group"]] = dyCount == 0 ? 0 : dyCount;
       dyCount = cCount + dyCount;
@@ -350,7 +357,8 @@ class BooksState extends State<Books> {
     return ListView(
       key: _listKey,
       controller: _scrollController,
-      children: _creatList(),
+      children:
+          ListTile.divideTiles(context: context, tiles: _creatList()).toList(),
     );
   }
 }
