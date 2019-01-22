@@ -7,6 +7,8 @@
 
 >2019-1-15 
 >>新增了MultipleDropDownButton Widget(需要注意的是child需要自己定义，控制状态以及获取值)
+>2019-1-22 
+>>新增列表效果（利用ScrollController，RefreshIndicator两个类实现的下拉刷新，上拉加载更多，需要根据情况优化效果）
 
 #### 效果预览
 
@@ -14,5 +16,6 @@
 ![首页](http://thyrsi.com/t6/653/1547108238x2890208847.png)
 ![通讯录](http://thyrsi.com/t6/653/1547108306x2890208847.png)
 ![工作](http://thyrsi.com/t6/653/1547108326x2890208847.png)
-![工作-列表页](http://thyrsi.com/t6/657/1547544993x2918527038.png)
+![工作-列表页1](http://thyrsi.com/t6/657/1547544993x2918527038.png)
+![工作-列表页2](http://thyrsi.com/t6/661/1548153474x1822611209.png)
 ![我的](http://thyrsi.com/t6/653/1547108344x2890208847.png)
