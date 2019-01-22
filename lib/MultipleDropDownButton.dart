@@ -3,15 +3,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MultipleDropDownButton extends StatefulWidget {
   final List<MultipleDropDownButtonItem> children;
-  final int height;
-  final double borderWidth;
-  final Color borderColor;
+  final int buttonLineHeight;
+  final double buttonBorderWidth;
+  final Color buttonBorderColor;
+  final double childBorderWidth;
+  final Color childBorderColor;
   MultipleDropDownButton(
       {Key key,
       this.children,
-      this.height = 70,
-      this.borderWidth = 1.5,
-      this.borderColor = Colors.grey});
+      this.buttonLineHeight = 70,
+      this.buttonBorderWidth = 1.5,
+      this.buttonBorderColor = Colors.grey,
+      this.childBorderColor = Colors.grey,
+      this.childBorderWidth = 1.5});
   @override
   State<StatefulWidget> createState() {
     return _MultipleDropDownButtonState();
@@ -63,8 +67,11 @@ class _MultipleDropDownButtonState extends State<MultipleDropDownButton>
       ),
       Offset.zero & overlay.size,
     );
-    _multipleDropDownButtonRoute =
-        _MultipleDropDownButtonRoute(position: position, child: item.child);
+    _multipleDropDownButtonRoute = _MultipleDropDownButtonRoute(
+        position: position,
+        child: item.child,
+        childBorderColor: widget.childBorderColor,
+        childBorderWidth: widget.childBorderWidth);
     Navigator.push(context, _multipleDropDownButtonRoute);
   }
 
@@ -99,11 +106,12 @@ class _MultipleDropDownButtonState extends State<MultipleDropDownButton>
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: ScreenUtil().setHeight(widget.height),
+      height: ScreenUtil().setHeight(widget.buttonLineHeight),
       decoration: BoxDecoration(
         border: Border(
             bottom: BorderSide(
-                color: widget.borderColor, width: widget.borderWidth)),
+                color: widget.buttonBorderColor,
+                width: widget.buttonBorderWidth)),
       ),
       child: Row(
         children: _createButtons(),
@@ -138,7 +146,13 @@ class _MultipleDropDownButtonRouteLayout extends SingleChildLayoutDelegate {
 class _MultipleDropDownButtonRoute extends PopupRoute {
   final RelativeRect position;
   final Widget child;
-  _MultipleDropDownButtonRoute({this.position, this.child});
+  final Color childBorderColor;
+  final double childBorderWidth;
+  _MultipleDropDownButtonRoute(
+      {this.position,
+      this.child,
+      this.childBorderColor,
+      this.childBorderWidth});
   @override
   Color get barrierColor => null;
 
@@ -161,7 +175,13 @@ class _MultipleDropDownButtonRoute extends PopupRoute {
         builder: (BuildContext context) {
           return CustomSingleChildLayout(
             delegate: _MultipleDropDownButtonRouteLayout(position),
-            child: child,
+            child: Container(
+                child: child,
+                decoration: BoxDecoration(
+                    border: Border(
+                        bottom: BorderSide(
+                            color: childBorderColor,
+                            width: childBorderWidth)))),
           );
         },
       ),
