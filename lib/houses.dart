@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hello_world/MultipleDropDownButton.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hello_world/housesSearch.dart';
 
 class Houses extends StatefulWidget {
   final String title;
@@ -17,21 +18,55 @@ class HousesState extends State<Houses> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          elevation: 0.0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () {},
+            elevation: 0.0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(context);
+              },
             ),
-          ],
-          title: Text(widget.title),
-        ),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.map),
+                onPressed: () {},
+              ),
+            ],
+            title: Stack(
+              children: <Widget>[
+                Center(
+                  child: Container(
+                    height: ScreenUtil().setHeight(70),
+                    decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        border: Border.all(width: 1.0, color: Colors.grey[50]),
+                        borderRadius: BorderRadius.circular(6.0)),
+                  ),
+                ),
+                Center(
+                    child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HousesSearch()));
+                  },
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.search,
+                        color: Colors.grey[400],
+                      ),
+                      Text(
+                        "楼盘名称或房源编号",
+                        style: TextStyle(
+                            fontSize: ScreenUtil().setSp(30),
+                            color: Colors.grey[400]),
+                      )
+                    ],
+                  ),
+                ))
+              ],
+            )),
         body: Column(
           children: <Widget>[
             MultipleDropDownButton(
