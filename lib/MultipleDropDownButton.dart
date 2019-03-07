@@ -133,8 +133,7 @@ class _MultipleDropDownButtonRouteLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    double height = size.height - position.bottom;
-    return new Offset(0.0, height);
+    return new Offset(0.0, ScreenUtil.statusBarHeight / 2);
   }
 
   @override
@@ -154,7 +153,7 @@ class _MultipleDropDownButtonRoute extends PopupRoute {
       this.childBorderColor,
       this.childBorderWidth});
   @override
-  Color get barrierColor => null;
+  Color get barrierColor => Color(0x33fafafa);
 
   @override
   bool get barrierDismissible => true;
@@ -176,8 +175,10 @@ class _MultipleDropDownButtonRoute extends PopupRoute {
           return CustomSingleChildLayout(
             delegate: _MultipleDropDownButtonRouteLayout(position),
             child: Container(
+                height: 200.0,
                 child: child,
                 decoration: BoxDecoration(
+                    color: Colors.grey[50],
                     border: Border(
                         bottom: BorderSide(
                             color: childBorderColor,

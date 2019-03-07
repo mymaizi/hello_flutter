@@ -73,21 +73,21 @@ class HousesState extends State<Houses> {
               buttonBorderColor: Colors.grey[300],
               childBorderColor: Colors.grey[300],
               children: <MultipleDropDownButtonItem>[
-                MultipleDropDownButtonItem("区域", Text("区域")),
+                MultipleDropDownButtonItem("区域", Text("")),
                 MultipleDropDownButtonItem(
                     "总价",
                     Container(
-                      child: Text("总价"),
+                      child: Text(""),
                     )),
                 MultipleDropDownButtonItem(
                     "户型",
                     Container(
-                      child: Text("户型"),
+                      child: Text(""),
                     )),
                 MultipleDropDownButtonItem(
                     "更多",
                     Container(
-                      child: Text("更多"),
+                      child: Text(""),
                     )),
               ],
             ),
