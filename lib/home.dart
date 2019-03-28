@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hello_world/houses.dart';
+import 'package:hello_flutter/houses.dart';
 
 class Home extends StatelessWidget {
   @override

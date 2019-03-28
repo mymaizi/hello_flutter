@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hello_world/home.dart';
-import 'package:hello_world/job.dart';
-import 'package:hello_world/my.dart';
-import 'package:hello_world/book.dart';
+import 'package:hello_flutter/home.dart';
+import 'package:hello_flutter/job.dart';
+import 'package:hello_flutter/my.dart';
+import 'package:hello_flutter/book.dart';
 class TabMain extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

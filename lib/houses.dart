@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hello_world/MultipleDropDownButton.dart';
+import 'package:hello_flutter/MultipleDropDownButton.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hello_world/housesSearch.dart';
+import 'package:hello_flutter/housesSearch.dart';
 
 class Houses extends StatefulWidget {
   final String title;
